@@ -4,7 +4,11 @@
 # - https://blueprints.launchpad.net/fuel/+spec/component-registry
 # - https://specs.openstack.org/openstack/fuel-specs/specs/8.0/component-registry.html
 
-- name: additional_service:service_plugin_v4_component
+- name: additional_service:postgres_database
   label: "Posgres plugin for controller"
   description: "This plugin include HA postgresql on the contollers"
-
+  compatible:
+    - name: 'hypervisor:*'
+    - name: 'additional_service:*'
+    - name: 'storage:*'
+    - name: 'network:*'

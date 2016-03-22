@@ -4,12 +4,3 @@
 # in the /etc/astute.yaml file on each target node and can be accessed from
 # your bash or puppet scripts.
 
-attributes:
-  metadata:
-    group: 'other'
-  fuel_postgres_plugin_text:
-    value: 'Set default value'
-    label: 'Text field'
-    description: 'Description for text field'
-    weight: 25
-    type: "text"
