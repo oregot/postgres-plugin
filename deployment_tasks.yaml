@@ -1,0 +1,24 @@
+- id: postgres_plugin_predeploy
+  type: group
+  role: [postgres-node]
+  tasks:
+    - hiera
+    - globals
+  required_for: [deploy_end]
+  requires: [deploy_start]
+  parameters:
+    strategy:
+      type: parallel
+
+- id: postgres_plugin-deployment
+  type: puppet
+  version: 2.0.0
+  groups: [primary-controller, controller]
+  required_for: [deploy_end]
+  requires: [deploy_start]
+  parameters:
+    puppet_manifest: "deploy.pp"
+    puppet_modules: "."
+    timeout: 3600
+    retries: 3
+
