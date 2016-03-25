@@ -13,7 +13,7 @@
     # List of VIPs to be allocated
     vip:
          # Unique VIP name
-       - name: "vip_pgsql"
+       - name: "pgsql"
          # Optional linux namespace for VIP
          namespace: "haproxy"
          # Optional alias so VIP can be queried via API
