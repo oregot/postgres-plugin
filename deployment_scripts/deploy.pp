@@ -1,7 +1,7 @@
 notice('MODULAR: postgres_database.pp')
 
 $network_metadata = hiera_hash('network_metadata')
-$nodes_list       = keys($network_metadata[nodes])
+$nodes_list       = join(keys($network_metadata[nodes])," ")
 $pgsql_vip   = $network_metadata['vips']['pgsql']['ipaddr']
 $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
