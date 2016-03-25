@@ -5,5 +5,5 @@
   stage: post_deployment
   type: shell
   parameters:
-    cmd: bash ls
+    cmd: ls
     timeout: 42

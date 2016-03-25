@@ -3,7 +3,7 @@
   type: group
   role: [postgresql_plugin]
   required_for: [deploy_end]
-  requires: [deploy_start]
+  requires: [deploy_start,cluster]
   tasks: [fuel_pkgs, hiera, globals, tools, logging, netconfig,
         hosts, firewall, ssl-keys-saving, ssl-add-trust-chain, hosts, 
         cluster, virtual_ips]
@@ -19,7 +19,7 @@
   requires: [deploy_start, postgres_plugin_vip]
   parameters:
     puppet_manifest: "deploy.pp"
-    puppet_modules: "."
+    puppet_modules: "/etc/puppet/modules:puppet/modules"
     timeout: 3600
     retries: 3
 
