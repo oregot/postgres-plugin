@@ -11,15 +11,50 @@
     strategy:
         type: one_by_one
 
-- id: postgres_plugin-deployment
+- id: postgres_plugin-deployment_firewall
   type: puppet
   version: 2.0.0
   groups: [primary-controller, controller]
   required_for: [deploy_end]
   requires: [deploy_start, postgres_plugin_vip]
   parameters:
-    puppet_manifest: "deploy.pp"
+    puppet_manifest: "firewall.pp"
     puppet_modules: "/etc/puppet/modules:puppet/modules"
     timeout: 3600
     retries: 3
 
+- id: postgres_plugin-deployment_postgres_primary
+  type: puppet
+  version: 2.0.0
+  groups: [primary-controller]
+  required_for: [deploy_end]
+  requires: [deploy_start, postgres_plugin-deployment_firewall]
+  parameters:
+    puppet_manifest: "postgres.pp"
+    puppet_modules: "/etc/puppet/modules:puppet/modules"
+    timeout: 3600
+    retries: 3
+    
+- id: postgres_plugin-deployment_postgres_controller
+  type: puppet
+  version: 2.0.0
+  groups: [controller]
+  required_for: [deploy_end]
+  requires: [deploy_start, postgres_plugin-deployment_postgres_primary]
+  parameters:
+    puppet_manifest: "postgres.pp"
+    puppet_modules: "/etc/puppet/modules:puppet/modules"
+    timeout: 3600
+    retries: 3
+
+- id: postgres_plugin-deployment_pacemaker
+  type: puppet
+  version: 2.0.0
+  groups: [primary-controller]
+  required_for: [deploy_end]
+  requires: [deploy_start, postgres_plugin-deployment_postgres_controller]
+  parameters:
+    puppet_manifest: "pacemaker.pp"
+    puppet_modules: "/etc/puppet/modules:puppet/modules"
+    timeout: 3600
+    retries: 3

@@ -1,4 +1,4 @@
-notice('MODULAR: postgres_database.pp')
+notice('MODULAR: postgres_database/pacemaker.pp')
 
 $network_metadata = hiera_hash('network_metadata')
 $nodes_list       = join(keys($network_metadata[nodes])," ")
@@ -7,21 +7,10 @@ $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
 
 
-# Installing and configure postgresql
-class { 'postgresql::globals':
-  encoding => 'UTF8',
-} ->
-
-class { 'postgresql::server':
-  listen_addresses        => '0.0.0.0',
-  ip_mask_allow_all_users => '0.0.0.0/0',
-
-} ->
-
 # Stopping postgresql befor adding it to the pacemaker
 exec { "service postgresql stop":
   path    => ["/usr/bin", "/usr/sbin"]
-}
+} ->
 
 # Creating postgresql resource in pacemaker
 cs_resource {$postgres_resource_name:
@@ -33,6 +22,7 @@ cs_resource {$postgres_resource_name:
     'pgctl'     => '/usr/lib/postgresql/9.3/bin/pg_ctl',
     'psql'      => '/usr/lib/postgresql/9.3/bin/psql',
     'pgdata'    => '/var/lib/postgresql/9.3/main',
+    'conf'      => '/etc/postgresql/9.3/main/postgresql.conf',
     'rep_mode'  => 'sync',
     'node_list' => "$nodes_list",
     'master_ip' => "$pgsql_vip",
@@ -41,9 +31,9 @@ cs_resource {$postgres_resource_name:
   complex_type => 'master',
   ms_metadata  => {
     'notify'          => 'true',
-    'clone-node-max'  => '3',
+    'clone-node-max'  => '1',
     'master-max'      => '1',
-    'master-node-max' => '1',
+    'master-node-max' => '3',
     'target-role'     => 'Master'
   },
   operations   => {
@@ -84,23 +74,35 @@ cs_resource {$postgres_resource_name:
     },
 
   },
-}
+} ->
 
 # colocate postgresql resource with its vip
 cs_colocation { "pgsql_with_vip":
   primitives => [ "master_${postgres_resource_name}:Master", "$postgres_vip_name" ],
-}
+} ->
 
 # order postgresql resource vip its vip during promote and demote
 cs_order { "start_vip_before_pgsql_promote":
   first   => "master_$postgres_resource_name:Promote",
   second  => "$postgres_vip_name",
   score   => "INFINITY",
-}
+} ->
 
 cs_order { "stop_vip_before_pgsql_demote":
   first   => "master_$postgres_resource_name:Demote",
   second  => "$postgres_vip_name",
   score   => "0",
+} ->
+
+cs_location { 'postgresql_service_location':
+  primitive => 'master_p_pgsql',
+  node_name => 'node-19.domain.tld',
+  score     => '100'
+} ->
+
+cs_location { 'postgresql_service_location2':
+  primitive => 'master_p_pgsql',
+  node_name => 'node-21.domain.tld',
+  score     => '100'
 }
 
