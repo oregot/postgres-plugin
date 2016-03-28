@@ -27,7 +27,7 @@ exec { "service postgresql stop":
 cs_resource {$postgres_resource_name:
   ensure          => present,
   primitive_class => 'ocf',
-  provided_by     => 'hearbeat',
+  provided_by     => 'heartbeat',
   primitive_type  => 'pgsql',
   parameters => {
     'pgctl'     => '/usr/lib/postgresql/9.3/bin/pg_ctl',
@@ -41,9 +41,9 @@ cs_resource {$postgres_resource_name:
   complex_type => 'master',
   ms_metadata  => {
     'notify'          => 'true',
-    'clone-node-max'  => '1',
+    'clone-node-max'  => '3',
     'master-max'      => '1',
-    'master-node-max' => '3',
+    'master-node-max' => '1',
     'target-role'     => 'Master'
   },
   operations   => {
