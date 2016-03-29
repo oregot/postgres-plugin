@@ -1,6 +1,7 @@
 notice('MODULAR: postgres_database/postgres.pp')
 
 $network_metadata = hiera_hash('network_metadata')
+$roles            = hiera('roles')
 $nodes_list       = join(keys($network_metadata[nodes])," ")
 $pgsql_vip   = $network_metadata['vips']['pgsql']['ipaddr']
 $postgres_resource_name = 'p_pgsql'
@@ -8,6 +9,10 @@ $postgres_vip_name = 'vip__pgsql'
 
 
 # Installing and configure postgresql
+
+if member($roles, 'primary-controller')
+{
+
 class { 'postgresql::globals':
   encoding => 'UTF8',
 } ->
@@ -42,4 +47,11 @@ postgresql::server::config_entry { 'hot_standby':
 file {'/var/lib/postgresql/9.3/main/postgresql.conf':
   ensure => 'link',
   target => '/etc/postgresql/9.3/main/postgresql.conf',
+}
+
+}
+
+
+if (member($roles, 'primary-controller') != 'primary-controller'  and member($roles, 'controller') == 'controller'  ) {
+notice ("I'm controller, but not primary!")
 }

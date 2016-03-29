@@ -1,10 +1,21 @@
 notice('MODULAR: postgres_database/pacemaker.pp')
 
+$nodes_hash                     = hiera('nodes', {})
 $network_metadata = hiera_hash('network_metadata')
-$nodes_list       = join(keys($network_metadata[nodes])," ")
+#$nodes_list       = join(keys($network_metadata[nodes])," ")
 $pgsql_vip   = $network_metadata['vips']['pgsql']['ipaddr']
 $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
+$corosync_nodes = nodes_with_roles($nodes_hash, ['primary-controller', 'controller'], 'fqdn')
+$separate_corosync_nodes = join($corosync_nodes,' ')
+
+define puppet::binary::location ($fqdn = $title) {
+cs_location { "postgresql_service_$fqdn":
+  primitive => 'master_p_pgsql',
+  node_name =>  "$fqdn",
+  score     => '100'
+} }
+
 
 
 # Stopping postgresql befor adding it to the pacemaker
@@ -24,7 +35,7 @@ cs_resource {$postgres_resource_name:
     'pgdata'    => '/var/lib/postgresql/9.3/main',
     'conf'      => '/etc/postgresql/9.3/main/postgresql.conf',
     'rep_mode'  => 'sync',
-    'node_list' => "$nodes_list",
+    'node_list' => "$separate_corosync_nodes",
     'master_ip' => "$pgsql_vip",
     'restart_on_promote' => 'true',
   },
@@ -94,15 +105,5 @@ cs_order { "stop_vip_before_pgsql_demote":
   score   => "0",
 } ->
 
-cs_location { 'postgresql_service_location':
-  primitive => 'master_p_pgsql',
-  node_name => 'node-19.domain.tld',
-  score     => '100'
-} ->
-
-cs_location { 'postgresql_service_location2':
-  primitive => 'master_p_pgsql',
-  node_name => 'node-21.domain.tld',
-  score     => '100'
-}
+puppet::binary::location { $corosync_nodes: }
 
