@@ -13,3 +13,7 @@ Plugin based on the following points:
  - if postgres master will be failed then another instance postgres with
       slave role will promote to master by pacemaker
  - this solution doesn't use load balancing with haproxy, and provide access direct to vIP
+
+ TODO:
+  - init db have to only primary-controller, and all other controller should replication db
+  - archive log require shared storage, we should provide it
