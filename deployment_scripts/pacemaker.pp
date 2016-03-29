@@ -33,7 +33,6 @@ cs_resource {$postgres_resource_name:
     'pgctl'     => '/usr/lib/postgresql/9.3/bin/pg_ctl',
     'psql'      => '/usr/lib/postgresql/9.3/bin/psql',
     'pgdata'    => '/var/lib/postgresql/9.3/main',
-    'conf'      => '/etc/postgresql/9.3/main/postgresql.conf',
     'rep_mode'  => 'sync',
     'node_list' => "$separate_corosync_nodes",
     'master_ip' => "$pgsql_vip",

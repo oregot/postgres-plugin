@@ -18,9 +18,9 @@ class { 'postgresql::globals':
 } ->
 
 class { 'postgresql::server':
-  listen_addresses        => '0.0.0.0',
+  listen_addresses           => '0.0.0.0',
   ipv4acls                   => ['host all all 0.0.0.0/0 trust','host replication all 0.0.0.0/0 trust'],
-  ip_mask_allow_all_users => '0.0.0.0/0',
+  ip_mask_allow_all_users    => '0.0.0.0/0',
 
 }
 
@@ -45,8 +45,11 @@ postgresql::server::config_entry { 'hot_standby':
 
 
 file {'/var/lib/postgresql/9.3/main/postgresql.conf':
-  ensure => 'link',
-  target => '/etc/postgresql/9.3/main/postgresql.conf',
+  ensure  => 'link',
+  target  => '/etc/postgresql/9.3/main/postgresql.conf',
+  owner   => 'postgres',
+  group   => 'postgres',
+
 }
 
 }
