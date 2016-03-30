@@ -93,15 +93,19 @@ cs_colocation { "pgsql_with_vip":
 
 # order postgresql resource vip its vip during promote and demote
 cs_order { "start_vip_before_pgsql_promote":
-  first   => "master_$postgres_resource_name:Promote",
+  provider => 'crm',
+  first   => "master_$postgres_resource_name:promote",
   second  => "$postgres_vip_name",
   score   => "INFINITY",
+  symmetrical => 'false',
 } ->
 
 cs_order { "stop_vip_before_pgsql_demote":
-  first   => "master_$postgres_resource_name:Demote",
+  provider => 'crm',
+  first   => "master_$postgres_resource_name:demote",
   second  => "$postgres_vip_name",
-  score   => "0",
+  score   => '0',
+  symmetrical => 'false',
 } ->
 
 puppet::binary::location { $corosync_nodes: }
