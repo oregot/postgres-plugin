@@ -55,6 +55,39 @@ file {'/var/lib/postgresql/9.3/main/postgresql.conf':
 }
 
 
-if (member($roles, 'primary-controller') != 'primary-controller'  and member($roles, 'controller') == 'controller'  ) {
-notice ("I'm controller, but not primary!")
+if  member($roles, 'controller') and ! member($roles, 'primary-controller')   {
+notice ("Try to replicate DB from master")
+
+package { 'postgresql-server':
+  ensure   => true,
+  name     => postgresql,
+} ->
+
+exec { "service postgresql stop":
+  path     => ["/usr/bin", "/usr/sbin"]
+} ->
+
+file { "remove-postgresql-dir":
+  name     => "/var/lib/postgresql/9.3/main",
+  ensure   => 'absent',
+  recurse  => true,
+  purge    => true,
+  force    => true,
+} ->
+
+exec { "pg_basebackup -h $primary_controllet_int_ip -U postgres -D /var/lib/postgresql/9.3/main -X stream -P":
+  path    => ["/usr/bin", "/usr/sbin"],
+  user    => 'postgres',
+  group   => 'postgres',
+} ->
+
+file {'/var/lib/postgresql/9.3/main/postgresql.conf':
+  ensure  => 'link',
+  target  => '/etc/postgresql/9.3/main/postgresql.conf',
+  owner   => 'postgres',
+  group   => 'postgres',
+
+}
+
+
 }
