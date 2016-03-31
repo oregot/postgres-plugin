@@ -52,7 +52,6 @@ max_wal_senders=5
 wal_keep_segments = 32
 hot_standby = on
 restart_after_crash = off
-replication_timeout = 5000
 wal_receiver_status_interval = 2
 max_standby_streaming_delay = -1
 max_standby_archive_delay = -1
