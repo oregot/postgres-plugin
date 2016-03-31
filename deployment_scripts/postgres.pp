@@ -6,16 +6,16 @@ $nodes_list       = join(keys($network_metadata[nodes])," ")
 $pgsql_vip   = $network_metadata['vips']['pgsql']['ipaddr']
 $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
-
+$postgresql_version = '9.5'
 
 # Installing and configure postgresql
 
 if member($roles, 'primary-controller')
 {
 
-package { 'postgresql-server':
+package { "postgresql-server-$postgresql_version":
   ensure   => true,
-  name     => postgresql,
+  name     => "postgresql-$postgresql_versin",
 } ->
 
 
@@ -34,7 +34,7 @@ file {'/var/lib/pgsql/pg_archive/':
 } ->
 
 exec {'init db':
-  name    => '/usr/lib/postgresql/9.3/bin/initdb -D /var/lib/pgsql/data',
+  name    => "/usr/lib/postgresql/$postgresql_version/bin/initdb -D /var/lib/pgsql/data",
   user    => 'postgres',
   group   => 'postgres',
   onlyif  => '/usr/bin/test ! -d /var/lib/pgsql/data/base/',
