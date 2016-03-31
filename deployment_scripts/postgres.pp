@@ -63,7 +63,7 @@ hot_standby_feedback = on
 file { '/var/lib/pgsql/data/pg_hba.conf':
   ensure => file,
   content => '
-host    all             all     127.0.0.1/32    trust
+local   all             all                     trust
 host    all             all     0.0.0.0/0       trust
 host    replication     all     0.0.0.0/0       trust
 ',
