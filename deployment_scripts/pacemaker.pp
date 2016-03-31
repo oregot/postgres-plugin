@@ -19,7 +19,7 @@ cs_location { "postgresql_service_$fqdn":
 
 
 # Stopping postgresql befor adding it to the pacemaker
-exec { "service postgresql stop":
+exec { "/etc/init.d/pacemaker stop":
   path    => ["/usr/bin", "/usr/sbin"]
 } ->
 
