@@ -8,6 +8,8 @@ $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
 $corosync_nodes = nodes_with_roles($nodes_hash, ['primary-controller', 'controller'], 'fqdn')
 $separate_corosync_nodes = join($corosync_nodes,' ')
+$postgresql_version = '9.5'
+
 
 define puppet::binary::location ($fqdn = $title) {
 cs_location { "postgresql_service_$fqdn":
@@ -30,8 +32,8 @@ cs_resource {$postgres_resource_name:
   provided_by     => 'heartbeat',
   primitive_type  => 'pgsql',
   parameters => {
-    'pgctl'     => '/usr/lib/postgresql/9.3/bin/pg_ctl',
-    'psql'      => '/usr/lib/postgresql/9.3/bin/psql',
+    'pgctl'     => "/usr/lib/postgresql/$postgresql_version/bin/pg_ctl",
+    'psql'      => "/usr/lib/postgresql/$postgresql_version/bin/psql",
     'pgdata'    => '/var/lib/pgsql/data',
     'rep_mode'  => 'sync',
     'node_list' => "$separate_corosync_nodes",

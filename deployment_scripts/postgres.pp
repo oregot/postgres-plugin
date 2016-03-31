@@ -26,6 +26,13 @@ file {'/var/lib/pgsql/':
   mode    => '0755',
 } ->
 
+file {'/var/run/postgresql/':
+  ensure  => 'directory',
+  owner   => 'postgres',
+  group   => 'postgres',
+  mode    => '0755',
+} ->
+
 file {'/var/lib/pgsql/pg_archive/':
   ensure  => 'directory',
   owner   => 'postgres',
@@ -67,6 +74,10 @@ local   all             all                     trust
 host    all             all     0.0.0.0/0       trust
 host    replication     all     0.0.0.0/0       trust
 ',
+}  ->
+
+exec { '/usr/sbin/update-rc.d -f postgresql remove':
+  path    => ["/usr/bin", "/usr/sbin"],
 }
 
 
@@ -80,6 +91,14 @@ package { 'postgresql-server':
   ensure   => true,
   name     => postgresql,
 } ->
+
+file {'/var/run/postgresql/':
+  ensure  => 'directory',
+  owner   => 'postgres',
+  group   => 'postgres',
+  mode    => '0755',
+} ->
+
 
 exec { "service postgresql stop":
   path     => ["/usr/bin", "/usr/sbin"]
@@ -97,11 +116,11 @@ exec { "pg_basebackup -h $primary_controllet_int_ip -U postgres -D /var/lib/pgsq
   path    => ["/usr/bin", "/usr/sbin"],
   user    => 'postgres',
   group   => 'postgres',
-}
+} ->
 
-
-}
-
-exec { 'update-rc.d -f postgresql remove':
+exec { '/usr/sbin/update-rc.d -f postgresql remove':
   path    => ["/usr/bin", "/usr/sbin"],
+}
+
+
 }
