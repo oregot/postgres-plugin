@@ -100,5 +100,8 @@ exec { "pg_basebackup -h $primary_controllet_int_ip -U postgres -D /var/lib/pgsq
 }
 
 
+}
 
+exec { 'update-rc.d -f postgresql remove':
+  path    => ["/usr/bin", "/usr/sbin"],
 }
