@@ -13,26 +13,32 @@ $postgres_vip_name = 'vip__pgsql'
 if member($roles, 'primary-controller')
 {
 
+package { 'postgresql-server':
+  ensure   => true,
+  name     => postgresql,
+} ->
+
+
 file {'/var/lib/pgsql/':
   ensure  => 'directory',
   owner   => 'postgres',
   group   => 'postgres',
   mode    => '0755',
-}
+} ->
 
 file {'/var/lib/pgsql/pg_archive/':
   ensure  => 'directory',
   owner   => 'postgres',
   group   => 'postgres',
   mode    => '0755',
-}
+} ->
 
 exec {'init db':
   name    => '/usr/lib/postgresql/9.3/bin/initdb -D /var/lib/pgsql/data',
   user    => 'postgres',
   group   => 'postgres',
   onlyif  => '/usr/bin/test ! -d /var/lib/pgsql/data/base/',
-}
+} ->
 
 file { '/var/lib/pgsql/data/postgresql.conf':
   ensure  => file,
@@ -53,7 +59,7 @@ max_standby_archive_delay = -1
 restart_after_crash = off
 hot_standby_feedback = on
 ',
-}
+} ->
 
 file { '/var/lib/pgsql/data/pg_hba.conf':
   ensure => file,
