@@ -15,7 +15,7 @@ if member($roles, 'primary-controller')
 
 package { "postgresql-server-$postgresql_version":
   ensure   => true,
-  name     => "postgresql-$postgresql_versin",
+  name     => "postgresql-$postgresql_version",
 } ->
 
 
