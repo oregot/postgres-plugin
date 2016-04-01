@@ -1,5 +1,5 @@
 
-- id: postgres_plugin_vip
+- id: postgresql_database
   type: group
   role: [postgresql_database]
   required_for: [deploy_end]
@@ -14,9 +14,9 @@
 - id: postgres_plugin-deployment_firewall
   type: puppet
   version: 2.0.0
-  groups: [primary-controller, controller]
+  groups: [postgresql_database]
   required_for: [deploy_end]
-  requires: [postgres_plugin_vip]
+  requires: [deploy_start,cluster,virtual_ips]
   parameters:
     puppet_manifest: "firewall.pp"
     puppet_modules: "/etc/puppet/modules:puppet/modules"
@@ -26,7 +26,7 @@
 - id: postgres_plugin-deployment_postgres_primary
   type: puppet
   version: 2.0.0
-  groups: [primary-controller, controller]
+  groups: [postgresql_database]
   required_for: [deploy_end]
   requires: [postgres_plugin-deployment_firewall]
   parameters:
@@ -38,7 +38,7 @@
 - id: postgres_plugin-deployment_pacemaker
   type: puppet
   version: 2.0.0
-  groups: [primary-controller]
+  groups: [postgresql_database]
   required_for: [deploy_end]
   requires: [postgres_plugin-deployment_postgres_primary]
   parameters:
