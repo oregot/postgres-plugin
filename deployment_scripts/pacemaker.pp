@@ -8,7 +8,9 @@ $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
 $corosync_nodes = nodes_with_roles($nodes_hash, ['primary-controller', 'controller'], 'fqdn')
 $separate_corosync_nodes = join($corosync_nodes,' ')
-$postgresql_version = '9.5'
+$postgres_hash = hiera_hash('postgresql_database')
+$postgresql_version = pick($postgres_hash['postgresql_plugin_version_database'],'9.5')
+
 
 
 define puppet::binary::location ($fqdn = $title) {

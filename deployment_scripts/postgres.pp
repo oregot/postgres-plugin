@@ -7,8 +7,9 @@ $nodes_list       = join(keys($network_metadata[nodes])," ")
 $pgsql_vip   = $network_metadata['vips']['pgsql']['ipaddr']
 $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
-$postgresql_version = '9.5'
 $primary_controllet_int_ip = nodes_with_roles($nodes_hash, ['primary-controller'], 'internal_address')
+$postgres_hash = hiera_hash('postgresql_database')
+$postgresql_version = pick($postgres_hash['postgresql_plugin_version_database'],'9.5')
 
 # Installing and configure postgresql
 
@@ -82,6 +83,7 @@ exec { "/usr/lib/postgresql/9.5/bin/pg_ctl -D /var/lib/postgresql/9.5/main stop"
   path    => ["/usr/bin", "/usr/sbin"],
   user    => 'postgres',
   group   => 'postgres',
+
 } ->
 
 
@@ -130,6 +132,7 @@ exec { "/usr/lib/postgresql/9.5/bin/pg_ctl -D /var/lib/postgresql/9.5/main stop"
   path    => ["/usr/bin", "/usr/sbin"],
   user    => 'postgres',
   group   => 'postgres',
+
 } ->
 
 exec { '/usr/sbin/update-rc.d -f postgresql remove':
