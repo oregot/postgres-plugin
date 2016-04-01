@@ -1,4 +1,4 @@
-postgresql_database_role:
+postgresql_database:
   name: "PostgreSQL database"
   description: "Install PostgreSQL on the nodes"
   has_primary: false                # whether has primary role or not

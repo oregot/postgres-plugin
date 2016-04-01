@@ -4,3 +4,12 @@
 # in the /etc/astute.yaml file on each target node and can be accessed from
 # your bash or puppet scripts.
 
+attributes:
+  metadata:
+    group: 'other'
+  postgresql_plugin_version_database:
+    value: '9.5'
+    label: 'PostgreSQL version'
+    description: 'You can choise version of postgres database. It recommend to use 9.5'
+    weight: 25
+    type: "text"

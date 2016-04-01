@@ -21,9 +21,6 @@ cs_location { "postgresql_service_$fqdn":
 
 
 # Stopping postgresql befor adding it to the pacemaker
-exec { "/etc/init.d/postgresql stop":
-  path    => ["/usr/bin", "/usr/sbin"]
-} ->
 
 # Creating postgresql resource in pacemaker
 cs_resource {$postgres_resource_name:
@@ -111,4 +108,3 @@ cs_order { "stop_vip_before_pgsql_demote":
 } ->
 
 puppet::binary::location { $corosync_nodes: }
-

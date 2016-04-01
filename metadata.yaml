@@ -1,9 +1,9 @@
 # Plugin name
-name: postgres_database
+name: postgresql_database
 # Human-readable name for your plugin
 title: PostgreSQL database HA plugin
 # Plugin version
-version: '1.0.0'
+version: '1.0.19'
 # Description
 description: This plugin provide postgres database on all controller in HA mode
 # Required fuel version

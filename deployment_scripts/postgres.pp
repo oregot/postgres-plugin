@@ -1,5 +1,6 @@
 notice('MODULAR: postgres_database/postgres.pp')
 
+$nodes_hash                     = hiera('nodes', {})
 $network_metadata = hiera_hash('network_metadata')
 $roles            = hiera('roles')
 $nodes_list       = join(keys($network_metadata[nodes])," ")
@@ -7,6 +8,7 @@ $pgsql_vip   = $network_metadata['vips']['pgsql']['ipaddr']
 $postgres_resource_name = 'p_pgsql'
 $postgres_vip_name = 'vip__pgsql'
 $postgresql_version = '9.5'
+$primary_controllet_int_ip = nodes_with_roles($nodes_hash, ['primary-controller'], 'internal_address')
 
 # Installing and configure postgresql
 
@@ -17,7 +19,6 @@ package { "postgresql-server-$postgresql_version":
   ensure   => true,
   name     => "postgresql-$postgresql_version",
 } ->
-
 
 file {'/var/lib/pgsql/':
   ensure  => 'directory',
@@ -76,6 +77,14 @@ host    replication     all     0.0.0.0/0       trust
 ',
 }  ->
 
+exec { "/usr/lib/postgresql/9.5/bin/pg_ctl -D /var/lib/postgresql/9.5/main stop":
+  onlyif  => '/usr/bin/test -f "/var/lib/postgresql/9.5/main/postmaster.pid"',
+  path    => ["/usr/bin", "/usr/sbin"],
+  user    => 'postgres',
+  group   => 'postgres',
+} ->
+
+
 exec { '/usr/sbin/update-rc.d -f postgresql remove':
   path    => ["/usr/bin", "/usr/sbin"],
 }
@@ -89,7 +98,7 @@ notice ("Try to replicate DB from master")
 
 package { 'postgresql-server':
   ensure   => true,
-  name     => postgresql,
+  name     => "postgresql-$postgresql_version",
 } ->
 
 file {'/var/run/postgresql/':
@@ -100,19 +109,24 @@ file {'/var/run/postgresql/':
 } ->
 
 
-exec { "service postgresql stop":
-  path     => ["/usr/bin", "/usr/sbin"]
-} ->
+file { "present-postgresql-dir":
+  name     => "/var/lib/pgsql/",
+  ensure   => 'directory',
+  owner    => 'postgres',
+  group    => 'postgres',
+  mode     => '0700',
 
-file { "remove-postgresql-dir":
-  name     => "/var/lib/pgsql/data",
-  ensure   => 'absent',
-  recurse  => true,
-  purge    => true,
-  force    => true,
 } ->
 
 exec { "pg_basebackup -h $primary_controllet_int_ip -U postgres -D /var/lib/pgsql/data -X stream -P":
+  path    => ["/usr/bin", "/usr/sbin"],
+  user    => 'postgres',
+  group   => 'postgres',
+  onlyif  => '/usr/bin/test ! -d /var/lib/pgsql/data/base/',
+} ->
+
+exec { "/usr/lib/postgresql/9.5/bin/pg_ctl -D /var/lib/postgresql/9.5/main stop":
+  onlyif  => '/usr/bin/test -f "/var/lib/postgresql/9.5/main/postmaster.pid"',
   path    => ["/usr/bin", "/usr/sbin"],
   user    => 'postgres',
   group   => 'postgres',
@@ -120,7 +134,12 @@ exec { "pg_basebackup -h $primary_controllet_int_ip -U postgres -D /var/lib/pgsq
 
 exec { '/usr/sbin/update-rc.d -f postgresql remove':
   path    => ["/usr/bin", "/usr/sbin"],
+} ->
+
+exec { "/usr/sbin/pcs resource cleanup p_pgsql $fqdn":
+  path    => ["/usr/bin", "/usr/sbin"],
 }
+
 
 
 }
