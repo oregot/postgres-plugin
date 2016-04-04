@@ -37,7 +37,6 @@ cs_resource {$postgres_resource_name:
     'rep_mode'  => 'sync',
     'node_list' => "$separate_corosync_nodes",
     'master_ip' => "$pgsql_vip",
-    'restart_on_promote' => 'true',
   },
   complex_type => 'master',
   ms_metadata  => {

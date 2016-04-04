@@ -16,11 +16,13 @@ $postgresql_version = pick($postgres_hash['postgresql_plugin_version_database'],
 if member($roles, 'primary-controller')
 {
 
+# postgresql installation
 package { "postgresql-server-$postgresql_version":
   ensure   => true,
   name     => "postgresql-$postgresql_version",
 } ->
 
+# ensure that dir is present and right is correct
 file {'/var/lib/pgsql/':
   ensure  => 'directory',
   owner   => 'postgres',
@@ -28,6 +30,7 @@ file {'/var/lib/pgsql/':
   mode    => '0755',
 } ->
 
+# creating folder for pid file
 file {'/var/run/postgresql/':
   ensure  => 'directory',
   owner   => 'postgres',
@@ -35,6 +38,7 @@ file {'/var/run/postgresql/':
   mode    => '0755',
 } ->
 
+# creating folder for pg_archive files
 file {'/var/lib/pgsql/pg_archive/':
   ensure  => 'directory',
   owner   => 'postgres',
@@ -42,6 +46,7 @@ file {'/var/lib/pgsql/pg_archive/':
   mode    => '0755',
 } ->
 
+# creating instance
 exec {'init db':
   name    => "/usr/lib/postgresql/$postgresql_version/bin/initdb -D /var/lib/pgsql/data",
   user    => 'postgres',
@@ -49,6 +54,7 @@ exec {'init db':
   onlyif  => '/usr/bin/test ! -d /var/lib/pgsql/data/base/',
 } ->
 
+# change config
 file { '/var/lib/pgsql/data/postgresql.conf':
   ensure  => file,
   content => '
@@ -69,6 +75,7 @@ hot_standby_feedback = on
 ',
 } ->
 
+# adding permission
 file { '/var/lib/pgsql/data/pg_hba.conf':
   ensure => file,
   content => '
@@ -78,6 +85,7 @@ host    replication     all     0.0.0.0/0       trust
 ',
 }  ->
 
+# shutting off default instance
 exec { "/usr/lib/postgresql/9.5/bin/pg_ctl -D /var/lib/postgresql/9.5/main stop":
   onlyif  => '/usr/bin/test -f "/var/lib/postgresql/9.5/main/postmaster.pid"',
   path    => ["/usr/bin", "/usr/sbin"],
@@ -86,7 +94,7 @@ exec { "/usr/lib/postgresql/9.5/bin/pg_ctl -D /var/lib/postgresql/9.5/main stop"
 
 } ->
 
-
+# disable from autostart default instance postgresql
 exec { '/usr/sbin/update-rc.d -f postgresql remove':
   path    => ["/usr/bin", "/usr/sbin"],
 }
@@ -120,6 +128,7 @@ file { "present-postgresql-dir":
 
 } ->
 
+# copy database from already created instance
 exec { "pg_basebackup -h $primary_controllet_int_ip -U postgres -D /var/lib/pgsql/data -X stream -P":
   path    => ["/usr/bin", "/usr/sbin"],
   user    => 'postgres',
@@ -139,6 +148,7 @@ exec { '/usr/sbin/update-rc.d -f postgresql remove':
   path    => ["/usr/bin", "/usr/sbin"],
 } ->
 
+# say to pacemaker for try running postgresql on current host
 exec { "/usr/sbin/pcs resource cleanup p_pgsql $fqdn":
   path    => ["/usr/bin", "/usr/sbin"],
 }
