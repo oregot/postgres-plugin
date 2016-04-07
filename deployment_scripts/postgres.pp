@@ -88,7 +88,7 @@ host    replication     all     0.0.0.0/0       trust
 exec { 'Append needed config in /usr/share/postgresql/9.5/postgresql.conf.sample':
   path    => ["/usr/bin", "/usr/sbin"],
   name    => '/bin/echo "wal_level = hot_standby" >> /usr/share/postgresql/9.5/postgresql.conf.sample',
-  onlyif  => '/usr/bin/test ! grep ^"wal_level = hot_standby" /usr/share/postgresql/9.5/postgresql.conf.sample',
+  onlyif  => '/bin/su - postgres -c "! grep ^\'wal_level = hot_standby\' /usr/share/postgresql/9.5/postgresql.conf.sample"',
 } ->
 
 # shutting off default instance
